@@ -53,13 +53,14 @@ router.post('/', async (req, res) => {
 
     // Process with Gemini (Auto-handles tools now)
     const result = await gemini.processMessage(text, history, sender);
-    logger.info({ result }, 'Gemini final result');
+    logger.info({ resultText: result.text }, 'Gemini processing completed');
 
     // Save New History
     await memory.saveHistory(sender, result.history);
 
-    // Send text response back to user (In real life, call WhatsApp API)
-    logger.info({ to: sender, responseBody: result.text }, 'Sending response back to user');
+    // 3. Send real response back to user
+    const whatsapp = require('../services/whatsapp');
+    await whatsapp.sendMessage(sender, result.text);
   } catch (error) {
     logger.error(error, 'Error processing webhook');
     if (!res.headersSent) {
