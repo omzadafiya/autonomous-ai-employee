@@ -2,7 +2,15 @@ const Redis = require('ioredis');
 const config = require('../config');
 const logger = require('../utils/logger');
 
-const redis = new Redis(config.redisUrl);
+const redisUrl = config.redisUrl || 'redis://127.0.0.1:6379';
+const redis = new Redis(redisUrl, {
+  maxRetriesPerRequest: 1,
+  connectTimeout: 5000
+});
+
+redis.on('error', (err) => {
+  logger.error(err, 'Redis Connection Error');
+});
 
 /**
  * Get chat history from Redis

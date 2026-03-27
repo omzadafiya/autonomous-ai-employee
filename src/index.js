@@ -9,7 +9,18 @@ app.use('/uploads', express.static('/tmp'));
 
 // Basic health check
 app.get('/health', (req, res) => {
-  res.status(200).json({ status: 'OK', timestamp: new Date().toISOString() });
+  res.status(200).json({ status: 'OK', message: 'Server is running', env: process.env.NODE_ENV });
+});
+
+// Root route
+app.get('/', (req, res) => {
+  res.status(200).send('<h1>Autonomous AI Employee is Live!</h1><p>Send messages to the <code>/webhook</code> endpoint.</p>');
+});
+
+// Global Error Handler
+app.use((err, req, res, next) => {
+  logger.error(err, 'Global error caught');
+  res.status(500).json({ error: 'Internal Server Error', message: err.message });
 });
 
 // We will add routes here later
