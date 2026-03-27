@@ -2,12 +2,11 @@ const Redis = require('ioredis');
 const config = require('../config');
 const logger = require('../utils/logger');
 
-// Self-healing: Remove common CLI flags (--tls -u) and spaces if user pasted them
-let redisUrl = (config.redisUrl || 'redis://127.0.0.1:6379').trim();
-if (redisUrl.includes(' ')) {
-  const parts = redisUrl.split(' ');
-  redisUrl = parts.find(p => p.startsWith('redis')) || redisUrl;
-}
+// Ultra-Robust Self-healing: Extract only the redis URL from any string with flags/spaces
+let rawUrl = (config.redisUrl || '').trim();
+rawUrl = decodeURIComponent(rawUrl); // Fix for %20
+const match = rawUrl.match(/(redis|rediss):\/\/[^\s]+/);
+let redisUrl = match ? match[0] : 'redis://127.0.0.1:6379';
 
 const redis = new Redis(redisUrl, {
   maxRetriesPerRequest: 1,
