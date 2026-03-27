@@ -16,9 +16,11 @@ router.post('/', async (req, res) => {
     const gemini = require('../services/gemini');
     const memory = require('../services/redis');
     
-    // Extract message text and sender ID (Assuming 11za format)
-    const text = payload.message?.text || payload.text;
-    const sender = payload.message?.from || 'unknown_user';
+    // Extract message text and sender ID (Assuming 11za format as seen in logs)
+    const text = payload.content?.text || payload.message?.text || payload.text;
+    const sender = payload.from || payload.message?.from || 'unknown_user';
+    
+    logger.info({ text, sender }, 'Extracted message details');
     if (!text) return;
 
     // --- OWNER APPROVAL LOGIC ---
